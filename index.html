@@ -1,0 +1,625 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Jordan Vault">
+<meta name="theme-color" content="#101214">
+<meta name="robots" content="noindex">
+<title>Jordan Vault</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --paper:#ECEEF0; --card:#FBFCFC; --ink:#14171A; --muted:#59616A; --line:#CCD2D7;
+  --red:#C41230; --on-red:#FFFFFF; --good:#0A7446; --warn:#8A5200; --shade:rgba(20,23,26,.55);
+  --display:"Barlow Condensed","Arial Narrow",Impact,sans-serif;
+  --body:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --paper:#101214; --card:#1A1D20; --ink:#ECEFF1; --muted:#9BA4AC; --line:#30363B;
+    --red:#EE4359; --on-red:#14171A; --good:#45CF90; --warn:#E3A545; --shade:rgba(0,0,0,.7);
+    color-scheme:dark;
+  }
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.45}
+.app{max-width:560px;margin:0 auto;padding-inline:16px;padding-block:20px 48px;display:flex;flex-direction:column;gap:18px}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+h1,h2,h3{margin:0;font-family:var(--display);text-transform:uppercase;letter-spacing:.02em;line-height:1.05;text-wrap:balance}
+h1{font-size:2.3rem;font-weight:700} h2{font-size:1.35rem;font-weight:700} h3{font-size:1.1rem;font-weight:600}
+p{margin:0}
+.mono{font-family:var(--mono);font-size:.82rem;letter-spacing:.02em}
+.muted{color:var(--muted)} .small{font-size:.86rem} .num{font-variant-numeric:tabular-nums}
+.top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.top h1 span{color:var(--red)}
+.tabs{display:flex;border:1.5px solid var(--ink)}
+.tabs button{background:none;border:0;padding:8px 10px;font-family:var(--display);font-weight:600;text-transform:uppercase;letter-spacing:.05em;font-size:.95rem;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--ink);color:var(--paper)}
+.totals{display:grid;grid-template-columns:repeat(3,1fr);border-block:1.5px solid var(--ink)}
+.totals div{padding:10px 0;display:flex;flex-direction:column;gap:2px;min-width:0}
+.totals div+div{border-left:1px solid var(--line);padding-left:12px}
+.totals b{font-family:var(--display);font-size:1.7rem;font-weight:700;line-height:1}
+.totals span{font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+.stack{display:flex;flex-direction:column;gap:10px}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.btn{flex:1 1 140px;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:10px 14px;border:1.5px solid var(--ink);background:var(--card);cursor:pointer;font-family:var(--display);font-weight:600;font-size:1.05rem;text-transform:uppercase;letter-spacing:.05em;text-align:center;text-decoration:none;color:var(--ink);position:relative}
+.btn.primary{background:var(--red);border-color:var(--red);color:var(--on-red)}
+.btn.big{min-height:64px;font-size:1.3rem}
+.btn.quiet{border-color:var(--line);min-height:40px;font-size:.92rem;flex:0 1 auto}
+.btn.danger{border-color:var(--red);color:var(--red)}
+.btn[disabled]{opacity:.5;cursor:default}
+.btn input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+.lookup{display:flex;gap:8px}
+.lookup input{flex:1;min-width:0}
+input[type=text],input[type=number],input[type=password],select,textarea{width:100%;padding:10px 11px;border:1.5px solid var(--line);background:var(--card);border-radius:0;min-height:44px}
+textarea{min-height:70px;resize:vertical}
+.status{padding:10px 12px;border:1.5px dashed var(--ink);display:flex;align-items:center;gap:10px}
+.status.err{border-color:var(--red);color:var(--red)}
+.dot{width:9px;height:9px;background:var(--red);border-radius:50%;animation:pulse 1s infinite alternate;flex:none}
+@keyframes pulse{to{opacity:.25}}
+@media (prefers-reduced-motion: reduce){.dot{animation:none}}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:none;padding:5px 10px;font-family:var(--mono);font-size:.78rem;cursor:pointer;min-height:36px}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.chip b{font-weight:500;display:block}
+.chip.sz{min-width:64px;text-align:center}
+.group{display:flex;flex-direction:column;gap:8px}
+.group-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;border-bottom:1.5px solid var(--ink);padding-bottom:4px}
+.label{display:grid;grid-template-columns:72px minmax(0,1fr) auto;background:var(--card);border:1px solid var(--line);text-align:left;padding:0;cursor:pointer;width:100%;color:var(--ink)}
+.label .thumb{width:72px;height:100%;min-height:76px;background:#fff;object-fit:contain;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:1.5rem;color:#59616A}
+.label .info{padding:9px 11px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.label .name{font-family:var(--display);font-weight:700;font-size:1.12rem;text-transform:uppercase;line-height:1.1;overflow-wrap:anywhere}
+.label .side{border-left:1.5px dashed var(--line);padding:9px 11px;display:flex;flex-direction:column;align-items:flex-end;justify-content:space-between;gap:4px}
+.size{border:1.5px solid var(--ink);padding:1px 6px;font-family:var(--mono);font-size:.78rem;white-space:nowrap}
+.price{font-family:var(--display);font-weight:700;font-size:1.35rem;line-height:1}
+.tag{font-family:var(--mono);font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.tag.sell{color:var(--red)} .tag.sold{color:var(--good)}
+.empty{border:1.5px dashed var(--line);padding:22px 16px;display:flex;flex-direction:column;gap:8px}
+.empty ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
+.sheet{position:fixed;inset:0;background:var(--shade);z-index:10;overflow-y:auto}
+.sheet-in{max-width:560px;margin:0 auto;background:var(--paper);min-height:100%;padding-inline:16px;padding-block:calc(16px + env(safe-area-inset-top,0px)) 40px;display:flex;flex-direction:column;gap:14px}
+.sheet-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.hero{display:grid;grid-template-columns:110px minmax(0,1fr);gap:12px;align-items:center}
+.hero img{width:110px;background:#fff;border:1px solid var(--line)}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fields .wide{grid-column:1/-1}
+.f{display:flex;flex-direction:column;gap:3px;min-width:0}
+.f>span{font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+.check{flex-direction:row;align-items:center;gap:8px;min-height:44px}
+.check input{width:20px;height:20px;accent-color:var(--red)}
+.est{border-left:3px solid var(--warn);padding:6px 10px;background:var(--card)}
+.est.live{border-left-color:var(--good)}
+table{width:100%;border-collapse:collapse;font-size:.92rem}
+th,td{padding:8px 6px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:500}
+td.r,th.r{text-align:right;white-space:nowrap}
+tr.best td{font-weight:600} tr.best td.r{color:var(--good)} tr.off td{color:var(--muted)}
+.wrap-x{overflow-x:auto}
+.guide{display:flex;flex-direction:column;gap:18px}
+.guide section{display:flex;flex-direction:column;gap:8px}
+.guide ul,.guide ol{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:5px}
+.pick{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;align-items:baseline;margin:0}
+.pick dt{font-family:var(--display);font-weight:700;text-transform:uppercase;font-size:1.05rem}
+.pick dd{margin:0}
+#csvOut{font-family:var(--mono);font-size:.75rem;min-height:120px}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <h1>Jordan <span>Vault</span></h1>
+    <div class="tabs" role="tablist">
+      <button id="tabCollection" role="tab" aria-selected="true">Vault</button>
+      <button id="tabGuide" role="tab" aria-selected="false">Sell</button>
+      <button id="tabSetup" role="tab" aria-selected="false">Setup</button>
+    </div>
+  </header>
+
+  <main id="viewCollection" class="stack" style="gap:18px">
+    <section class="totals" aria-label="Collection totals">
+      <div><b class="num" id="tPairs">0</b><span>Pairs</span></div>
+      <div><b class="num" id="tValue">$0</b><span>Market value</span></div>
+      <div><b class="num" id="tNet">$0</b><span>After fees</span></div>
+    </section>
+
+    <section class="stack">
+      <div class="status err" id="needKey" hidden><span>No price key yet. Open <b>Setup</b> and paste your KicksDB key to get live prices.</span></div>
+      <label class="btn primary big">Scan box label
+        <input type="file" id="camInput" accept="image/*" capture="environment">
+      </label>
+      <p class="small muted">Fill the frame with the white label on the end of the box, or the size tag inside the shoe. The app reads the style code off it.</p>
+      <div class="lookup">
+        <input type="text" id="lookupInput" placeholder="Or type the style code: DH6927-111" autocomplete="off" autocapitalize="characters" spellcheck="false">
+        <button class="btn quiet" id="lookupBtn">Look up</button>
+      </div>
+      <div class="status" id="busy" hidden><i class="dot"></i><span id="busyText">Working…</span></div>
+      <div class="status err" id="msg" hidden></div>
+    </section>
+
+    <div class="chips" id="chips"></div>
+    <div id="list" class="stack" style="gap:18px"></div>
+
+    <section class="row" id="toolRow" hidden>
+      <button class="btn quiet" id="refreshBtn">Refresh all prices</button>
+      <button class="btn quiet" id="csvBtn">Copy as spreadsheet</button>
+    </section>
+    <p class="small muted" id="toolNote" hidden>Your vault is stored on this phone. Copy the spreadsheet now and then as a backup.</p>
+    <textarea id="csvOut" hidden readonly aria-label="CSV export"></textarea>
+  </main>
+
+  <main id="viewGuide" class="guide" hidden>
+    <section>
+      <h2>Quick pick</h2>
+      <dl class="pick">
+        <dt>New + box</dt><dd>StockX for speed, eBay if it sells for $150 or more and you want the lowest fee.</dd>
+        <dt>Worn</dt><dd>GOAT or eBay. StockX's main marketplace only takes new, unworn pairs.</dd>
+        <dt>Under $150</dt><dd>GOAT or a local sale. eBay's fee jumps to 13.6% below $150.</dd>
+        <dt>Old / rare OG</dt><dd>eBay auction. Collectors of 1985–2000s pairs shop there and bid.</dd>
+        <dt>Many pairs fast</dt><dd>Whatnot live auctions, or a local consignment shop.</dd>
+      </dl>
+    </section>
+    <section>
+      <h2>Fees on one sale</h2>
+      <div class="wrap-x"><table>
+        <thead><tr><th>Marketplace</th><th>Seller fees</th><th class="r">You keep on $300</th></tr></thead>
+        <tbody id="feeRows"></tbody>
+      </table></div>
+      <p class="small muted">New-seller rates, checked October 2026. Shipping is extra where the marketplace doesn't cover it.</p>
+    </section>
+    <section>
+      <h2>Before you list</h2>
+      <ul>
+        <li>The vault price is the lowest StockX ask for a new pair in your size. To sell today you'd take the highest bid, which is lower.</li>
+        <li>For worn pairs, price from GOAT used listings and eBay sold listings. Each pair links to both.</li>
+        <li>Keep the original box, extra laces and hang tags with the pair.</li>
+        <li>Pairs from before about 2012 can have crumbling midsoles. Say so in the listing.</li>
+      </ul>
+    </section>
+  </main>
+
+  <main id="viewSetup" class="guide" hidden>
+    <section>
+      <h2>Live price key</h2>
+      <p>Prices come from StockX through KicksDB. Paste your KicksDB API key once. It stays on this phone and is only sent to api.kicks.dev.</p>
+      <label class="f"><span>KicksDB API key</span><input type="password" id="keyInput" placeholder="KICKS-XXXX-XXXX-XXXX-XXXXXXXXXXXX" autocomplete="off" autocapitalize="characters" spellcheck="false"></label>
+      <div class="row"><button class="btn primary" id="keySave">Save key</button><button class="btn quiet" id="keyTest">Test key</button></div>
+      <div class="status" id="keyMsg" hidden></div>
+    </section>
+    <section>
+      <h2>Get a key</h2>
+      <ol>
+        <li>Go to kicks.dev and create a free account.</li>
+        <li>Copy the API key from your dashboard.</li>
+        <li>Paste it above and tap Save, then Test.</li>
+      </ol>
+      <p class="small muted">The free plan allows 1,000 lookups a month. Each scan uses one or two.</p>
+    </section>
+    <section>
+      <h2>Put it on your home screen</h2>
+      <p>iPhone: Share, then Add to Home Screen. Android: menu, then Add to Home screen.</p>
+    </section>
+  </main>
+</div>
+
+<div class="sheet" id="sheet" hidden>
+  <div class="sheet-in">
+    <div class="sheet-head"><h2 id="sheetTitle">Pick your size</h2><button class="btn quiet" id="closeBtn">Close</button></div>
+    <div class="hero"><img id="heroImg" alt="" hidden><div class="stack" style="gap:4px"><h3 id="heroTitle"></h3><span class="mono" id="heroCode"></span></div></div>
+    <div class="stack" id="sizeBlock" style="gap:6px"><span class="tag">Your size · lowest StockX ask</span><div class="chips" id="sizeChips"></div></div>
+    <div class="fields">
+      <label class="f"><span>US size</span><input type="text" id="fSize" inputmode="decimal" placeholder="10.5"></label>
+      <label class="f"><span>Price (USD)</span><input type="number" id="fPrice" inputmode="decimal" min="0" step="1" placeholder="0"></label>
+      <label class="f"><span>Condition</span><select id="fCond"><option value="new">New, unworn</option><option value="used">Worn</option></select></label>
+      <label class="f"><span>Status</span><select id="fStatus"><option value="keep">Keeping</option><option value="sell">To sell</option><option value="listed">Listed</option><option value="sold">Sold</option></select></label>
+      <label class="f check wide"><input type="checkbox" id="fBox"> Original box</label>
+      <label class="f wide"><span>Name</span><input type="text" id="fTitle"></label>
+      <label class="f"><span>Style code</span><input type="text" id="fCode" class="mono" autocapitalize="characters" spellcheck="false"></label>
+      <label class="f"><span>Group</span><input type="text" id="fLine" placeholder="Jordan 4"></label>
+    </div>
+    <p class="small est" id="priceNote"></p>
+    <div class="row" id="linkRow"></div>
+    <section class="stack" style="gap:6px">
+      <h3>What you'd keep</h3>
+      <div class="wrap-x"><table><thead><tr><th>Marketplace</th><th>Fees</th><th class="r">Payout</th></tr></thead><tbody id="payRows"></tbody></table></div>
+      <p class="small muted">Before shipping. New-seller rates, October 2026.</p>
+    </section>
+    <label class="f"><span>Notes</span><textarea id="fNote" placeholder="Flaws, extras, where it's stored"></textarea></label>
+    <div class="status err" id="sheetMsg" hidden></div>
+    <div class="row"><button class="btn primary" id="saveBtn">Save to vault</button><button class="btn" id="repriceBtn">Refresh price</button></div>
+    <div class="row"><button class="btn quiet danger" id="removeBtn" hidden>Remove this pair</button></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"></script>
+<script>
+(function(){
+"use strict";
+var API = "https://api.kicks.dev/v3/stockx/products";
+var $ = function(id){ return document.getElementById(id); };
+function h(tag, props){
+  var el = document.createElement(tag), k;
+  if (props) for (k in props){
+    var v = props[k];
+    if (v == null || v === false) continue;
+    if (k === "class") el.className = v;
+    else if (k === "text") el.textContent = v;
+    else if (k.slice(0,2) === "on") el.addEventListener(k.slice(2), v);
+    else el.setAttribute(k, v === true ? "" : v);
+  }
+  for (var i = 2; i < arguments.length; i++){
+    var c = arguments[i];
+    if (c == null || c === false) continue;
+    if (Array.isArray(c)) c.forEach(function(x){ if (x != null && x !== false) el.append(x); });
+    else el.append(c);
+  }
+  return el;
+}
+var usd = new Intl.NumberFormat("en-US", {style:"currency", currency:"USD", maximumFractionDigits:0});
+function money(n){ return usd.format(Math.round(Number(n) || 0)); }
+function num(v){ var n = Number(String(v == null ? "" : v).replace(/[^0-9.]/g, "")); return isFinite(n) ? n : 0; }
+function str(v){ return v == null ? "" : String(v).trim(); }
+function ls(k, v){ try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch(e){ return null; } }
+
+/* ---------- fees: new-seller rates, checked October 2026 ---------- */
+function payouts(price, cond){
+  var p = Number(price) || 0;
+  var rows = [
+    {name:"eBay", fee: p >= 150 ? "8%, no per-order fee" : "13.6% + $0.40 (under $150)", net: p >= 150 ? p * 0.92 : p * 0.864 - 0.40, ok:true},
+    {name:"StockX", fee:"9.5% + 3% processing", net: p * 0.875, ok: cond !== "used", why:"New, unworn pairs only"},
+    {name:"GOAT", fee:"9.5% + $5, then 2.9% cash-out", net: (p * 0.905 - 5) * 0.971, ok:true},
+    {name:"Whatnot", fee:"8% + 2.9% + $0.30", net: p * 0.891 - 0.30, ok:true}
+  ];
+  rows.forEach(function(r){ r.net = Math.max(0, r.net); });
+  rows.sort(function(a,b){ return (b.ok - a.ok) || (b.net - a.net); });
+  return rows;
+}
+function bestNet(s){ var r = payouts(s.price, s.condition)[0]; return r ? r.net : 0; }
+
+/* ---------- style code reading ---------- */
+// Nike/Jordan codes: AA1234-123 (newer) or 123456-123 (older).
+function fixCode(a, b){
+  a = a.toUpperCase();
+  var digits = function(s){ return s.replace(/O/g,"0").replace(/[IL]/g,"1").replace(/S/g,"5").replace(/B/g,"8"); };
+  var letters = function(s){ return s.replace(/0/g,"O").replace(/1/g,"I").replace(/5/g,"S").replace(/8/g,"B"); };
+  var v1 = digits(a);
+  if (/^\d{6}$/.test(v1) && /\d/.test(a.slice(0,2))) return v1 + "-" + digits(b);
+  var v2 = letters(a.slice(0,2)) + digits(a.slice(2));
+  if (/^[A-Z]{2}\d{4}$/.test(v2)) return v2 + "-" + digits(b);
+  return null;
+}
+function findCode(text){
+  var t = String(text || "").toUpperCase(), re = /([A-Z0-9]{6})\s{0,2}[-–—_.~]?\s{0,2}([0-9OILSB]{3})(?![A-Z0-9])/g, m;
+  while ((m = re.exec(t))){
+    var c = fixCode(m[1], m[2]);
+    if (c && /^\d{3}$/.test(c.slice(-3))) return c;
+  }
+  return null;
+}
+function normCode(s){ return String(s || "").toUpperCase().replace(/[^A-Z0-9]/g, ""); }
+
+function toCanvas(file, max){
+  return createImageBitmap(file).then(function(bmp){
+    var k = Math.min(1, max / Math.max(bmp.width, bmp.height)), c = document.createElement("canvas");
+    c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k);
+    c.getContext("2d").drawImage(bmp, 0, 0, c.width, c.height);
+    return c;
+  });
+}
+function readLabel(file){
+  if (!window.Tesseract) return Promise.reject(new Error("ocr-missing"));
+  return toCanvas(file, 2000).then(function(c){
+    return Tesseract.recognize(c, "eng", {logger:function(m){
+      if (m.status === "recognizing text") $("busyText").textContent = "Reading the label… " + Math.round(m.progress * 100) + "%";
+    }});
+  }).then(function(r){ return findCode(r.data.text); });
+}
+
+/* ---------- KicksDB ---------- */
+function api(path){
+  var key = str(ls("jv_key"));
+  if (!key) return Promise.reject({code:"nokey"});
+  return fetch(API + path, {headers:{Authorization:"Bearer " + key}}).then(function(res){
+    if (res.status === 401 || res.status === 403) throw {code:"auth"};
+    if (res.status === 429) throw {code:"rate"};
+    if (res.status === 404) return {data:null};
+    if (!res.ok) throw {code:"http", status:res.status};
+    return res.json();
+  }, function(){ throw {code:"net"}; });
+}
+function getProduct(idOrSlug){
+  return api("/" + encodeURIComponent(idOrSlug) + "?display[variants]=true").then(function(j){
+    var d = j && j.data; return Array.isArray(d) ? d[0] : d;
+  });
+}
+function findProduct(q){
+  return api("?query=" + encodeURIComponent(q) + "&limit=10&display[variants]=true").then(function(j){
+    var arr = (j && j.data) || []; if (!Array.isArray(arr)) arr = [arr];
+    if (!arr.length) return null;
+    var n = normCode(q), p = arr.filter(function(x){ return normCode(x.sku) === n; })[0] || arr[0];
+    if (Array.isArray(p.variants) && p.variants.length) return p;
+    return getProduct(p.id || p.slug).then(function(full){ return full || p; });
+  });
+}
+// -> [{size:"10.5", ask:245}] for US men's sizes, sorted
+function sizesOf(p){
+  var seen = {}, out = [];
+  (p && p.variants || []).forEach(function(v){
+    var type = String(v.size_type || "").toLowerCase();
+    if (type && type.indexOf("us") < 0) return;
+    var size = str(v.size).replace(/^US\s*/i, "").replace(/^M\s*/i, "");
+    var ask = Number(v.lowest_ask) || 0;
+    if (!size || seen[size]) return;
+    seen[size] = 1; out.push({size:size, ask:ask});
+  });
+  return out.sort(function(a,b){ return parseFloat(a.size) - parseFloat(b.size); });
+}
+var ERR = {
+  nokey:"Add your KicksDB key in Setup first. Without it there are no live prices.",
+  auth:"KicksDB rejected the key, or this month's free lookups are used up. Check it in Setup.",
+  rate:"Too many lookups too fast. Wait a minute and try again.",
+  net:"No connection to the price service. Check your signal and try again."
+};
+function errText(e){ return (e && ERR[e.code]) || "The price service returned an error" + (e && e.status ? " (" + e.status + ")" : "") + ". Try again."; }
+
+/* ---------- state ---------- */
+var shoes = [], filter = "all", draft = null, draftId = null, draftSizes = [], removeArmed = false;
+try { shoes = JSON.parse(ls("jv_shoes") || "[]") || []; } catch(e){ shoes = []; }
+function persist(){ ls("jv_shoes", JSON.stringify(shoes)); }
+
+function lineOf(title){ var m = /jordan\s*(\d+)/i.exec(title || ""); return m ? "Jordan " + m[1] : "Other"; }
+function lineKey(s){ return str(s.line) || "Other"; }
+function lineOrder(a, b){
+  var na = parseInt((a.match(/\d+/) || [999])[0], 10), nb = parseInt((b.match(/\d+/) || [999])[0], 10);
+  return (na - nb) || a.localeCompare(b);
+}
+var STATUS = {keep:"Keeping", sell:"To sell", listed:"Listed", sold:"Sold"};
+
+function render(){
+  $("needKey").hidden = !!str(ls("jv_key"));
+  var active = shoes.filter(function(s){ return s.status !== "sold"; });
+  $("tPairs").textContent = String(active.length);
+  $("tValue").textContent = money(active.reduce(function(t,s){ return t + (Number(s.price) || 0); }, 0));
+  $("tNet").textContent = money(active.reduce(function(t,s){ return t + bestNet(s); }, 0));
+  var lines = Array.from(new Set(shoes.map(lineKey))).sort(lineOrder);
+  if (filter !== "all" && filter !== "sell" && lines.indexOf(filter) < 0) filter = "all";
+  var chips = $("chips"); chips.replaceChildren();
+  if (shoes.length) [["all","All"],["sell","To sell"]].concat(lines.map(function(l){ return [l, l]; })).forEach(function(c){
+    chips.append(h("button", {class:"chip", "aria-pressed": String(filter === c[0]), text:c[1], onclick:function(){ filter = c[0]; render(); }}));
+  });
+  var list = $("list"); list.replaceChildren();
+  $("toolRow").hidden = !shoes.length; $("toolNote").hidden = !shoes.length;
+  if (!shoes.length){
+    list.append(h("div", {class:"empty"}, h("h3", {text:"No pairs yet"}),
+      h("ol", {class:"small"},
+        h("li", {text:"Tap Scan box label and photograph the label."}),
+        h("li", {text:"Tap your size. The price is the current lowest StockX ask for it."}),
+        h("li", {text:"Save. Each pair shows what you'd keep on each marketplace."}))));
+    return;
+  }
+  var shown = shoes.filter(function(s){
+    if (filter === "all") return true;
+    if (filter === "sell") return s.status === "sell" || s.status === "listed";
+    return lineKey(s) === filter;
+  });
+  var groups = {};
+  shown.forEach(function(s){ (groups[lineKey(s)] = groups[lineKey(s)] || []).push(s); });
+  Object.keys(groups).sort(lineOrder).forEach(function(g){
+    var items = groups[g].sort(function(a,b){ return (Number(b.price)||0) - (Number(a.price)||0); });
+    var sub = items.reduce(function(t,s){ return t + (s.status === "sold" ? 0 : Number(s.price) || 0); }, 0);
+    list.append(h("section", {class:"group"},
+      h("div", {class:"group-head"}, h("h2", {text:g}), h("span", {class:"mono muted num", text: items.length + (items.length === 1 ? " pair · " : " pairs · ") + money(sub)})),
+      items.map(card)));
+  });
+  if (!shown.length) list.append(h("p", {class:"muted", text:"Nothing in this filter."}));
+}
+function card(s){
+  var thumb = s.image ? h("img", {class:"thumb", src:s.image, alt:"", loading:"lazy"}) : h("div", {class:"thumb", text:(lineKey(s).match(/\d+/) || ["J"])[0]});
+  return h("button", {class:"label", onclick:function(){ openSheet(Object.assign({}, s), s.id, null); }},
+    thumb,
+    h("div", {class:"info"},
+      h("span", {class:"name", text: str(s.title) || "Unnamed pair"}),
+      h("span", {class:"mono", text: (str(s.sku) || "no style code") + (s.condition === "used" ? " · worn" : " · new") + (s.box ? "" : " · no box")}),
+      h("span", {class:"tag", text: s.priceSource === "stockx" && s.priceAt ? "StockX ask · " + new Date(s.priceAt).toLocaleDateString() : s.price ? "Your price" : "No price"})),
+    h("div", {class:"side"},
+      h("span", {class:"size", text: s.size ? "US " + s.size : "size ?"}),
+      h("span", {class:"price num", text: money(s.price)}),
+      h("span", {class:"tag " + (s.status === "sold" ? "sold" : (s.status === "sell" || s.status === "listed") ? "sell" : ""), text: STATUS[s.status] || "Keeping"})));
+}
+
+/* ---------- sheet ---------- */
+function fromProduct(p){
+  return {title: str(p.title), sku: str(p.sku), line: lineOf(p.title), image: str(p.image), productId: str(p.id), slug: str(p.slug),
+    size:"", price:0, priceSource:"", priceAt:"", condition:"new", box:true, status:"keep", note:""};
+}
+function openSheet(d, id, sizes){
+  draft = d; draftId = id || null; draftSizes = sizes || []; removeArmed = false;
+  $("sheetTitle").textContent = id ? "Pair details" : "Pick your size";
+  $("heroTitle").textContent = str(d.title) || "New pair";
+  $("heroCode").textContent = str(d.sku);
+  $("heroImg").hidden = !d.image; if (d.image) $("heroImg").src = d.image;
+  $("fTitle").value = str(d.title); $("fCode").value = str(d.sku); $("fLine").value = str(d.line);
+  $("fSize").value = str(d.size); $("fPrice").value = d.price ? String(Math.round(d.price)) : "";
+  $("fCond").value = d.condition === "used" ? "used" : "new";
+  $("fBox").checked = d.box !== false; $("fStatus").value = STATUS[d.status] ? d.status : "keep";
+  $("fNote").value = str(d.note);
+  $("removeBtn").hidden = !id; $("removeBtn").textContent = "Remove this pair";
+  $("saveBtn").textContent = id ? "Save changes" : "Save to vault";
+  $("repriceBtn").hidden = !(d.productId || d.slug || d.sku);
+  $("sheetMsg").hidden = true;
+  drawSizes(); refreshSheet();
+  $("sheet").hidden = false; $("sheet").scrollTop = 0;
+}
+function closeSheet(){ $("sheet").hidden = true; draft = null; draftId = null; }
+function drawSizes(){
+  var box = $("sizeChips"); box.replaceChildren();
+  $("sizeBlock").hidden = !draftSizes.length;
+  draftSizes.forEach(function(v){
+    box.append(h("button", {class:"chip sz", "aria-pressed": String(str(draft.size) === v.size), onclick:function(){ pickSize(v); }},
+      h("b", {text: v.size}), v.ask ? money(v.ask) : "no ask"));
+  });
+}
+function pickSize(v){
+  draft.size = v.size; $("fSize").value = v.size;
+  if (v.ask){ draft.price = v.ask; draft.priceSource = "stockx"; draft.priceAt = new Date().toISOString(); $("fPrice").value = String(Math.round(v.ask)); }
+  drawSizes(); refreshSheet();
+}
+function readForm(){
+  var d = Object.assign({}, draft); delete d.id;
+  d.title = str($("fTitle").value); d.sku = str($("fCode").value).toUpperCase();
+  d.line = str($("fLine").value) || lineOf(d.title);
+  d.size = str($("fSize").value); d.condition = $("fCond").value; d.box = $("fBox").checked; d.status = $("fStatus").value;
+  var p = num($("fPrice").value);
+  if (p !== Math.round(Number(draft.price) || 0)){ d.priceSource = "you"; d.priceAt = new Date().toISOString(); }
+  d.price = p; d.note = str($("fNote").value);
+  if (!d.createdAt) d.createdAt = new Date().toISOString();
+  return d;
+}
+function refreshSheet(){
+  if (!draft) return;
+  var price = num($("fPrice").value), cond = $("fCond").value, typed = price !== Math.round(Number(draft.price) || 0);
+  var q = str($("fCode").value) || str($("fTitle").value), links = $("linkRow"); links.replaceChildren();
+  if (q){
+    var e = encodeURIComponent(q);
+    [["StockX", draft.slug ? "https://stockx.com/" + encodeURIComponent(draft.slug) : "https://stockx.com/search?s=" + e],
+     ["GOAT", "https://www.goat.com/search?query=" + e],
+     ["eBay sold", "https://www.ebay.com/sch/i.html?_nkw=" + e + "&LH_Sold=1&LH_Complete=1"]].forEach(function(l){
+      links.append(h("a", {class:"btn quiet", href:l[1], target:"_blank", rel:"noopener", text:l[0]}));
+    });
+  }
+  var note = $("priceNote"), live = draft.priceSource === "stockx" && !typed && price > 0;
+  note.className = "small est" + (live ? " live" : "");
+  if (live) note.textContent = "Lowest StockX ask for US " + (draft.size || "?") + ", pulled " + new Date(draft.priceAt).toLocaleString() + "." + (cond === "used" ? " That is the price of a NEW pair. Worn pairs sell for less: check GOAT and eBay sold below and type the real number." : "");
+  else if (price > 0) note.textContent = "You typed this price. It is not from the market feed.";
+  else note.textContent = draftSizes.length ? "Tap your size above to pull the live price." : "No live price yet. Tap Refresh price, or type one.";
+  var body = $("payRows"); body.replaceChildren();
+  var first = true;
+  payouts(price, cond).forEach(function(r){
+    var best = r.ok && first && price > 0; if (r.ok) first = false;
+    body.append(h("tr", {class: !r.ok ? "off" : best ? "best" : ""},
+      h("td", {text: r.name + (best ? " · best" : "")}), h("td", {class:"small", text: r.ok ? r.fee : r.why}),
+      h("td", {class:"r num", text: r.ok && price > 0 ? money(r.net) : "—"})));
+  });
+}
+
+/* ---------- actions ---------- */
+function busy(t){ $("busy").hidden = !t; if (t) $("busyText").textContent = t; $("lookupBtn").disabled = !!t; }
+function say(t){ $("msg").hidden = !t; if (t) $("msg").textContent = t; }
+function lookup(code){
+  say(""); busy("Getting live prices for " + code + "…");
+  return findProduct(code).then(function(p){
+    if (!p){ $("lookupInput").value = code; say("StockX has no match for " + code + ". Check the code against the label and fix it in the box above."); return; }
+    openSheet(fromProduct(p), null, sizesOf(p));
+  }).catch(function(e){ $("lookupInput").value = code; say(errText(e)); }).then(function(){ busy(null); });
+}
+$("camInput").addEventListener("change", function(){
+  var file = this.files && this.files[0]; this.value = "";
+  if (!file) return;
+  say(""); busy("Reading the label…");
+  readLabel(file).then(function(code){
+    if (!code){ busy(null); say("Couldn't read a style code in that photo. Get closer so the label fills the frame, or type the code (9 characters, like DH6927-111)."); return; }
+    return lookup(code);
+  }).catch(function(){ busy(null); say("The label reader failed to load. Check your connection, or type the style code."); });
+});
+function doLookup(){
+  var q = str($("lookupInput").value);
+  if (!q){ say("Type a style code first, like DH6927-111."); return; }
+  $("lookupInput").value = "";
+  lookup(findCode(q) || q);
+}
+$("lookupBtn").addEventListener("click", doLookup);
+$("lookupInput").addEventListener("keydown", function(e){ if (e.key === "Enter") doLookup(); });
+$("closeBtn").addEventListener("click", closeSheet);
+["fPrice","fCond","fCode","fTitle"].forEach(function(id){ $(id).addEventListener("input", refreshSheet); });
+$("saveBtn").addEventListener("click", function(){
+  var d = readForm();
+  if (!d.title && !d.sku){ $("sheetMsg").hidden = false; $("sheetMsg").textContent = "Add a name or style code first."; return; }
+  if (draftId) shoes = shoes.map(function(s){ return s.id === draftId ? Object.assign({id:draftId}, d) : s; });
+  else shoes.push(Object.assign({id:"s" + Date.now().toString(36)}, d));
+  persist(); closeSheet(); render();
+});
+$("removeBtn").addEventListener("click", function(){
+  if (!removeArmed){ removeArmed = true; this.textContent = "Tap again to remove for good"; return; }
+  shoes = shoes.filter(function(s){ return s.id !== draftId; });
+  persist(); closeSheet(); render();
+});
+function freshSizes(s){
+  return (s.productId || s.slug ? getProduct(s.productId || s.slug) : findProduct(s.sku)).then(function(p){ return p ? sizesOf(p) : []; });
+}
+$("repriceBtn").addEventListener("click", function(){
+  var btn = this; btn.disabled = true; btn.textContent = "Checking…"; $("sheetMsg").hidden = true;
+  var d = readForm();
+  freshSizes(d).then(function(sizes){
+    draft = d; draftSizes = sizes;
+    var hit = sizes.filter(function(v){ return v.size === str(d.size); })[0];
+    if (hit && hit.ask) pickSize(hit); else { drawSizes(); refreshSheet(); $("sheetMsg").hidden = false; $("sheetMsg").textContent = sizes.length ? "No live ask for size " + (d.size || "?") + ". Tap a size above." : "StockX has no listing data for this pair."; }
+  }).catch(function(e){ $("sheetMsg").hidden = false; $("sheetMsg").textContent = errText(e); })
+    .then(function(){ btn.disabled = false; btn.textContent = "Refresh price"; });
+});
+$("refreshBtn").addEventListener("click", function(){
+  var btn = this, todo = shoes.filter(function(s){ return s.status !== "sold" && s.priceSource !== "you" && (s.productId || s.slug || s.sku) && s.size; });
+  var done = 0, changed = 0, failed = null;
+  btn.disabled = true; say("");
+  (function next(i){
+    if (i >= todo.length || failed){
+      persist(); render(); btn.disabled = false; btn.textContent = "Refresh all prices";
+      say(failed ? errText(failed) + " Updated " + done + " of " + todo.length + " before stopping." : "");
+      if (!failed) btn.textContent = "Updated " + changed + " of " + todo.length;
+      return;
+    }
+    btn.textContent = "Refreshing " + (i + 1) + " of " + todo.length + "…";
+    freshSizes(todo[i]).then(function(sizes){
+      var hit = sizes.filter(function(v){ return v.size === str(todo[i].size); })[0];
+      if (hit && hit.ask){ todo[i].price = hit.ask; todo[i].priceSource = "stockx"; todo[i].priceAt = new Date().toISOString(); changed++; }
+      done++;
+    }, function(e){ failed = e; }).then(function(){ next(i + 1); });
+  })(0);
+});
+$("csvBtn").addEventListener("click", function(){
+  var cols = ["line","title","sku","size","condition","box","status","price","priceSource","priceAt","note"];
+  var csv = [cols.join(",")].concat(shoes.map(function(s){
+    return cols.map(function(c){ var v = s[c] == null ? "" : String(s[c]); return /[",\n]/.test(v) ? '"' + v.replace(/"/g,'""') + '"' : v; }).join(",");
+  })).join("\n");
+  var btn = this, out = $("csvOut");
+  function fallback(){ out.hidden = false; out.value = csv; out.focus(); out.select(); btn.textContent = "Select all and copy below"; }
+  try { navigator.clipboard.writeText(csv).then(function(){ btn.textContent = "Copied"; setTimeout(function(){ btn.textContent = "Copy as spreadsheet"; }, 1800); }, fallback); } catch(e){ fallback(); }
+});
+
+/* ---------- setup ---------- */
+function keyMsg(t, bad){ var el = $("keyMsg"); el.hidden = false; el.className = "status" + (bad ? " err" : ""); el.textContent = t; }
+$("keyInput").value = str(ls("jv_key"));
+$("keySave").addEventListener("click", function(){ ls("jv_key", str($("keyInput").value)); render(); keyMsg(str($("keyInput").value) ? "Saved on this phone. Tap Test key." : "Key cleared."); });
+$("keyTest").addEventListener("click", function(){
+  ls("jv_key", str($("keyInput").value)); render();
+  keyMsg("Testing…");
+  findProduct("DH6927-111").then(function(p){
+    if (!p){ keyMsg("The key works, but the test shoe wasn't found.", true); return; }
+    var s = sizesOf(p).filter(function(v){ return v.ask; })[0];
+    keyMsg("Working. " + str(p.title) + (s ? ": US " + s.size + " lowest ask " + money(s.ask) + "." : ": found, but no size prices came back. Tell Claude."), !s);
+  }).catch(function(e){ keyMsg(errText(e), true); });
+});
+
+function tab(which){
+  [["collection","viewCollection","tabCollection"],["guide","viewGuide","tabGuide"],["setup","viewSetup","tabSetup"]].forEach(function(t){
+    $(t[1]).hidden = which !== t[0]; $(t[2]).setAttribute("aria-selected", String(which === t[0]));
+  });
+}
+$("tabCollection").addEventListener("click", function(){ tab("collection"); });
+$("tabGuide").addEventListener("click", function(){ tab("guide"); });
+$("tabSetup").addEventListener("click", function(){ tab("setup"); });
+payouts(300, "new").forEach(function(r, i){
+  $("feeRows").append(h("tr", {class: i === 0 ? "best" : ""}, h("td", {text:r.name}), h("td", {class:"small", text:r.fee}), h("td", {class:"r num", text:money(r.net)})));
+});
+window.__jv = {findCode:findCode, sizesOf:sizesOf, readLabel:readLabel};
+render();
+if (!str(ls("jv_key"))) tab("setup");
+})();
+</script>
+</body>
+</html>
